@@ -29,7 +29,7 @@ class _BiodataState extends State<Biodata> {
 
   Future<void> fetchBiodata() async {
     final response = await http.get(Uri.parse(
-        'http://192.168.43.105/api/crud.php?user_id=${widget.userId}'));
+        'http://192.168.116.105/api/crud.php?user_id=${widget.userId}'));
 
     if (response.statusCode == 200) {
       setState(() {
@@ -144,11 +144,11 @@ class DetailData extends StatelessWidget {
               ),
               pw.SizedBox(height: 12),
               pw.Text(
-                'Jl.Jend. Gatot Subroto Kav.29 14th Floor,RT.4/RW.3, Kuningan,Kuningan ',
+                'Bukit Mampang Residence Blok KI No.5 ',
                 style: pw.TextStyle(fontSize: 10),
               ),
               pw.Text(
-                'Tim.,Kuningan, Jakarta, Daerah Khusus IbuKota Jakarta 12950',
+                'Jl.Cemara, Grogol Limo - Depok',
                 style: pw.TextStyle(fontSize: 10),
               ),
               pw.SizedBox(height: 10),
@@ -298,13 +298,13 @@ class DetailData extends StatelessWidget {
               height: 100.0, // Atur tinggi gambar
             ),
             Text(
-              'Jl.Jend. Gatot Subroto Kav.29 14th Floor,RT.4/RW.3, Kuningan,Kuningan ',
+              'Bukit Mampang Residence Blok KI No.5 ',
               style: TextStyle(
                 fontSize: 10.0,
               ),
             ),
             Text(
-              'Tim.,Kuningan, Jakarta, Daerah Khusus IbuKota Jakarta 12950',
+              'Jl. Cemara, Grogol Limo - Depok',
               style: TextStyle(
                 fontSize: 10.0,
               ),
@@ -358,7 +358,7 @@ class DetailData extends StatelessWidget {
                     ),
                     SizedBox(height: 8.0),
                     Text(
-                      'Total Penghasilan: ${biodata['total_penghasilan']}',
+                      'Total Penghasilan: ${biodata['total_pendapatan']}',
                       style: TextStyle(fontSize: 10.0, color: Colors.black),
                     ),
                   ],

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:penggajian/admin/datadivisi.dart';
-import 'package:penggajian/user/1.dart';
 import 'package:penggajian/user/slip_gaji_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -18,7 +17,7 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> login() async {
     String nip = nipController.text;
     String password = passwordController.text;
-    String apiUrl = 'http://192.168.43.105/api/login.php';
+    String apiUrl = 'http://192.168.116.105/api/login.php';
 
     try {
       var response = await http.post(
@@ -237,11 +236,6 @@ class _LoginPageState extends State<LoginPage> {
                             child: TextButton(
                               onPressed: () {
                                 // Navigasi ke halaman 1.dart ketika tombol ditekan
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => MyApp()),
-                                );
                               },
                               child: Text(
                                 "Forgot Password?",

@@ -25,7 +25,7 @@ class _BiodataState extends State<SlipGajiPage> {
 
   Future<void> fetchBiodata() async {
     final response = await http.get(Uri.parse(
-        'http://192.168.43.105/api/crud.php?user_id=${widget.userId}'));
+        'http://192.168.116.105/api/crud.php?user_id=${widget.userId}'));
 
     if (response.statusCode == 200) {
       setState(() {

@@ -15,7 +15,7 @@ class MonthlyReport extends StatefulWidget {
 }
 
 class _MonthlyReportState extends State<MonthlyReport> {
-  String _apiUrl = 'http://192.168.43.105/api/crud.php';
+  String _apiUrl = 'http://192.168.116.105/api/crud.php';
   Map<String, double> _monthlyTotal = {};
 
   @override

@@ -33,7 +33,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> fetchData() async {
-    var url = Uri.parse('http://192.168.43.105/api/crud.php');
+    var url = Uri.parse('http://192.168.179.105/api/crud.php');
 
     try {
       var response = await http.get(url);

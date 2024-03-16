@@ -23,7 +23,7 @@ class _DataDivisiState extends State<DataDivisi> {
   Future<void> _getData() async {
     try {
       final response =
-          await http.get(Uri.parse('http://192.168.43.105/api/crud.php'));
+          await http.get(Uri.parse('http://192.168.116.105/api/crud.php'));
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         for (var item in data) {

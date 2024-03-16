@@ -21,9 +21,6 @@ class DataKaryawanDetail extends StatefulWidget {
 class _DataKaryawanDetailState extends State<DataKaryawanDetail> {
   @override
   Widget build(BuildContext context) {
-    // Buat set untuk menyimpan user_id yang sudah ditampilkan
-    Set<String> displayedUserIds = {};
-
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -40,14 +37,6 @@ class _DataKaryawanDetailState extends State<DataKaryawanDetail> {
         itemBuilder: (context, index) {
           Map<String, dynamic> karyawan = widget.dataKaryawan[index];
           final userId = karyawan['user_id'];
-
-          // Jika user_id sudah ditampilkan sebelumnya, jangan tampilkan lagi
-          if (displayedUserIds.contains(userId)) {
-            return SizedBox.shrink(); // Widget kosong
-          }
-
-          // Tambahkan user_id ke set displayedUserIds
-          displayedUserIds.add(userId);
 
           return GestureDetector(
             onTap: () {
@@ -73,17 +62,17 @@ class _DataKaryawanDetailState extends State<DataKaryawanDetail> {
                         color: Colors.white,
                       ),
                     ),
-                    SizedBox(
-                        width:
-                            20), // Ubah ukuran menjadi 20 untuk spasi yang lebih kecil
+                    SizedBox(width: 20),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            karyawan.containsKey('user_id')
-                                ? karyawan['user_id']
-                                : '', // Periksa apakah 'divisi' ada sebelum mengaksesnya
+                            'User ID: ${karyawan['user_id']}',
+                            style: TextStyle(fontSize: 14, color: Colors.white),
+                          ),
+                          Text(
+                            'Nama: ${karyawan['nama']}',
                             style: TextStyle(fontSize: 14, color: Colors.white),
                           ),
                         ],
@@ -128,7 +117,7 @@ class _DetailKaryawanState extends State<DetailKaryawan> {
   Future<void> _getKaryawanDetail() async {
     try {
       final response = await http.get(Uri.parse(
-          'http://192.168.43.105/api/crud.php?user_id=${widget.userId}'));
+          'http://192.168.116.105/api/crud.php?user_id=${widget.userId}'));
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
         if (data.isNotEmpty) {
@@ -205,11 +194,13 @@ class TambahDataKaryawan extends StatefulWidget {
 }
 
 class _TambahDataKaryawanState extends State<TambahDataKaryawan> {
-  final TextEditingController _jumlahmasukController = TextEditingController();
-  final TextEditingController _alfaController = TextEditingController();
-  final TextEditingController _sakitController = TextEditingController();
-  final TextEditingController _cutiController = TextEditingController();
-  final TextEditingController _lemburController = TextEditingController();
+  TextEditingController hariKerjaController = TextEditingController();
+  TextEditingController izinAlfaController = TextEditingController();
+  TextEditingController izinCutiController = TextEditingController();
+  TextEditingController izinSakitController = TextEditingController();
+  TextEditingController lemburController = TextEditingController();
+  TextEditingController gajiPokokController = TextEditingController();
+
   final TextEditingController _bulanTahunController = TextEditingController();
   final TextEditingController _namaController = TextEditingController();
   final TextEditingController _nipController = TextEditingController();
@@ -233,6 +224,8 @@ class _TambahDataKaryawanState extends State<TambahDataKaryawan> {
   final TextEditingController _divisiController = TextEditingController();
   final TextEditingController _userIdController = TextEditingController();
 
+  double gaji = 0;
+
   @override
   void initState() {
     super.initState();
@@ -248,28 +241,82 @@ class _TambahDataKaryawanState extends State<TambahDataKaryawan> {
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
-              controller: _jumlahmasukController,
+              controller: hariKerjaController,
               keyboardType: TextInputType.number,
-              decoration: InputDecoration(labelText: 'Jumlah Masuk'),
+              decoration: InputDecoration(labelText: 'Hari Kerja'),
             ),
             TextField(
-              controller: _sakitController,
+              controller: izinAlfaController,
               keyboardType: TextInputType.number,
-              decoration: InputDecoration(labelText: 'Sakit'),
+              decoration: InputDecoration(labelText: 'Izin Alfa'),
             ),
             TextField(
-              controller: _alfaController,
-              decoration: InputDecoration(labelText: 'Alfa'),
+              controller: izinCutiController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(labelText: 'Izin Cuti'),
             ),
             TextField(
-              controller: _cutiController,
+              controller: izinSakitController,
               keyboardType: TextInputType.number,
-              decoration: InputDecoration(labelText: 'Cuti'),
+              decoration: InputDecoration(labelText: 'Izin Sakit'),
             ),
             TextField(
-              controller: _lemburController,
+              controller: lemburController,
               keyboardType: TextInputType.number,
-              decoration: InputDecoration(labelText: 'Lembur'),
+              decoration: InputDecoration(labelText: 'Lembur (jam)'),
+            ),
+            TextField(
+              controller: _gajiPokokController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(labelText: 'Gaji Pokok'),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  gaji = calculateSalary(
+                    hariKerjaController.text,
+                    izinAlfaController.text,
+                    izinCutiController.text,
+                    izinSakitController.text,
+                    lemburController.text,
+                    _gajiPokokController.text,
+                  );
+                  // Menghitung total pendapatan
+                  double tunjanganJabatan =
+                      double.parse(_tunjanganJabatanController.text);
+                  double tunjanganHarian =
+                      double.parse(_tunjanganHarianController.text);
+                  double konsumsi = double.parse(_konsumsiController.text);
+                  double totalPendapatan =
+                      gaji + tunjanganJabatan + tunjanganHarian + konsumsi;
+                  _totalPendapatanController.text =
+                      totalPendapatan.toStringAsFixed(2);
+
+                  // Menghitung total potongan
+                  double potonganBpjs =
+                      double.parse(_potonganBpjsController.text);
+                  double jht = double.parse(_jhtController.text);
+                  double pensiun = double.parse(_pensiunController.text);
+                  double pph21 = double.parse(_pph21Controller.text);
+                  double totalPotongan = potonganBpjs + jht + pensiun + pph21;
+                  _totalPotonganController.text =
+                      totalPotongan.toStringAsFixed(2);
+
+                  // Menghitung jumlah bersih
+                  double jumlahBersih = totalPendapatan - totalPotongan;
+                  _jumlahBersihController.text =
+                      jumlahBersih.toStringAsFixed(2);
+                });
+              },
+              child: Text('Hitung Gaji'),
+            ),
+            SizedBox(height: 20),
+            TextField(
+              controller: TextEditingController(text: gaji.toStringAsFixed(2)),
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(labelText: 'Gaji Pokok'),
+              style: TextStyle(fontSize: 18),
             ),
             TextField(
               controller: _bulanTahunController,
@@ -291,10 +338,6 @@ class _TambahDataKaryawanState extends State<TambahDataKaryawan> {
             TextField(
               controller: _statusController,
               decoration: InputDecoration(labelText: 'Status'),
-            ),
-            TextField(
-              controller: _gajiPokokController,
-              decoration: InputDecoration(labelText: 'Gaji Pokok'),
             ),
             TextField(
               controller: _tunjanganJabatanController,
@@ -378,7 +421,7 @@ class _TambahDataKaryawanState extends State<TambahDataKaryawan> {
     try {
       final response = await http.get(
         Uri.parse(
-            'http://192.168.43.105/api/crud.php?user_id=${widget.userId}'),
+            'http://192.168.116.105/api/crud.php?user_id=${widget.userId}'),
       );
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -411,7 +454,7 @@ class _TambahDataKaryawanState extends State<TambahDataKaryawan> {
   }
 
   Future<void> _tambahData() async {
-    String apiUrl = 'http://192.168.43.105/api/tambah.php';
+    String apiUrl = 'http://192.168.116.105/api/tambah.php';
     Map<String, dynamic> data = {
       'bulan_tahun': _bulanTahunController.text,
       'nama': _namaController.text,
@@ -482,5 +525,35 @@ class _TambahDataKaryawanState extends State<TambahDataKaryawan> {
     } catch (error) {
       print('Error: $error');
     }
+  }
+}
+
+double calculateSalary(
+    String hariKerjaStr,
+    String izinAlfaStr,
+    String izinCutiStr,
+    String izinSakitStr,
+    String lemburStr,
+    String gajiPokokStr) {
+  try {
+    int hariKerja = int.parse(hariKerjaStr);
+    int izinAlfa = int.parse(izinAlfaStr);
+    int izinCuti = int.parse(izinCutiStr);
+    int izinSakit = int.parse(izinSakitStr);
+    int lembur = int.parse(lemburStr);
+    double gajiPokok = double.parse(gajiPokokStr);
+
+    var potonganAlfa = izinAlfa * 150000;
+    var potonganSakit = izinSakit * 50000;
+    var bonusLembur =
+        lembur * 40000; // asumsi bonus lembur adalah 40000 per jam
+
+    var gaji = gajiPokok - potonganAlfa - potonganSakit + bonusLembur;
+
+    return gaji;
+  } catch (e) {
+    // Penanganan kesalahan jika input tidak valid
+    print('Error: $e');
+    return 0;
   }
 }
