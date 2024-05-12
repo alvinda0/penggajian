@@ -29,7 +29,7 @@ class _BiodataState extends State<Biodata> {
 
   Future<void> fetchBiodata() async {
     final response = await http.get(Uri.parse(
-        'http://192.168.116.105/api/crud.php?user_id=${widget.userId}'));
+        'http://192.168.192.103/api/crud.php?user_id=${widget.userId}'));
 
     if (response.statusCode == 200) {
       setState(() {
@@ -269,7 +269,7 @@ class DetailData extends StatelessWidget {
   Future<void> saveAndLaunchPdf() async {
     final pdfBytes = await generatePdf();
     final output = await getTemporaryDirectory();
-    final file = File('${output.path}/biodata.pdf');
+    final file = File('${output.path}/Laporan_Slip_Gaji.pdf');
     await file.writeAsBytes(pdfBytes);
     await OpenFile.open(file.path);
   }
@@ -279,7 +279,7 @@ class DetailData extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Detail Data ', // Tambahkan User ID di AppBar
+          'Slip Gaji ', // Tambahkan User ID di AppBar
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.white,

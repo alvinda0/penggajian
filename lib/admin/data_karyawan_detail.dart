@@ -3,6 +3,7 @@ import 'package:penggajian/admin/drawer_admin.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+
 class DataKaryawanDetail extends StatefulWidget {
   final List<Map<String, dynamic>> dataKaryawan;
 
@@ -37,6 +38,9 @@ class _DataKaryawanDetailState extends State<DataKaryawanDetail> {
         itemBuilder: (context, index) {
           Map<String, dynamic> karyawan = widget.dataKaryawan[index];
           final userId = karyawan['user_id'];
+          
+
+
 
           return GestureDetector(
             onTap: () {
@@ -75,6 +79,15 @@ class _DataKaryawanDetailState extends State<DataKaryawanDetail> {
                             'Nama: ${karyawan['nama']}',
                             style: TextStyle(fontSize: 14, color: Colors.white),
                           ),
+                          Text(
+                            'Status: ${karyawan['status']}',
+                            style: TextStyle(fontSize: 14, color: Colors.white),
+                          ),
+                          
+                          Text(
+                            'Divisi: ${karyawan['divisi']}',
+                            style: TextStyle(fontSize: 14, color: Colors.white),
+                          ),
                         ],
                       ),
                     ),
@@ -87,7 +100,7 @@ class _DataKaryawanDetailState extends State<DataKaryawanDetail> {
       ),
       drawer: AppDrawerAdmin(
         nama: '',
-        role: '',
+        role: '', userId: '',
       ),
     );
   }
@@ -106,23 +119,23 @@ class DetailKaryawan extends StatefulWidget {
 }
 
 class _DetailKaryawanState extends State<DetailKaryawan> {
-  Map<String, dynamic> karyawan = {};
+  List<Map<String, dynamic>> karyawanList = [];
 
   @override
   void initState() {
     super.initState();
-    _getKaryawanDetail();
+    _getAllKaryawanDetail();
   }
 
-  Future<void> _getKaryawanDetail() async {
+  Future<void> _getAllKaryawanDetail() async {
     try {
       final response = await http.get(Uri.parse(
-          'http://192.168.116.105/api/crud.php?user_id=${widget.userId}'));
+          'http://192.168.192.103/api/crud.php?user_id=${widget.userId}'));
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
         if (data.isNotEmpty) {
           setState(() {
-            karyawan = data.first;
+            karyawanList = List<Map<String, dynamic>>.from(data);
           });
         }
       }
@@ -145,7 +158,7 @@ class _DetailKaryawanState extends State<DetailKaryawan> {
         backgroundColor: const Color.fromARGB(255, 50, 97, 52),
         actions: [
           IconButton(
-            icon: Icon(Icons.add),
+            icon: Icon(Icons.add, color: Colors.white), // Mengubah warna ikon menjadi putih
             onPressed: () {
               // Navigasi ke halaman tambah karyawan dengan meneruskan userId
               Navigator.push(
@@ -160,29 +173,49 @@ class _DetailKaryawanState extends State<DetailKaryawan> {
           ),
         ],
       ),
-      body: karyawan.isEmpty
+      body: karyawanList.isEmpty
           ? Center(child: CircularProgressIndicator())
-          : ListView(
-              padding: EdgeInsets.all(16.0),
-              children: [
-                Card(
+          : ListView.builder(
+              itemCount: karyawanList.length,
+              itemBuilder: (BuildContext context, int index) {
+                Map<String, dynamic> karyawan = karyawanList[index];
+                return Card(
                   child: ListTile(
                     title: Text(
                       'Nama: ${karyawan['nama']}',
                       style: TextStyle(fontSize: 18.0),
                     ),
-                    subtitle: Text(
-                      'Divisi: ${karyawan['divisi']}',
-                      style: TextStyle(fontSize: 18.0),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'NIP: ${karyawan['nip']}',
+                          style: TextStyle(fontSize: 16.0),
+                        ),
+                        Text(
+                          'Divisi: ${karyawan['divisi']}',
+                          style: TextStyle(fontSize: 16.0),
+                        ),
+                        Text(
+                          'Status: ${karyawan['status']}',
+                          style: TextStyle(fontSize: 16.0),
+                        ),
+                        Text(
+                          'Tanggal: ${karyawan['bulan_tahun']}',
+                          style: TextStyle(fontSize: 16.0),
+                        ),
+                        
+                      ],
                     ),
                   ),
-                ),
-                // Tambahkan informasi lainnya sesuai kebutuhan
-              ],
+                );
+              },
             ),
     );
   }
 }
+
+
 
 class TambahDataKaryawan extends StatefulWidget {
   final String userId;
@@ -223,6 +256,7 @@ class _TambahDataKaryawanState extends State<TambahDataKaryawan> {
   final TextEditingController _jumlahBersihController = TextEditingController();
   final TextEditingController _divisiController = TextEditingController();
   final TextEditingController _userIdController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController(); // Added phone controller
 
   double gaji = 0;
 
@@ -235,7 +269,7 @@ class _TambahDataKaryawanState extends State<TambahDataKaryawan> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Tambah Data Karyawan'),
+      title: Text('Input Gaji Karyawan'),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -270,6 +304,7 @@ class _TambahDataKaryawanState extends State<TambahDataKaryawan> {
               keyboardType: TextInputType.number,
               decoration: InputDecoration(labelText: 'Gaji Pokok'),
             ),
+            
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
@@ -421,7 +456,7 @@ class _TambahDataKaryawanState extends State<TambahDataKaryawan> {
     try {
       final response = await http.get(
         Uri.parse(
-            'http://192.168.116.105/api/crud.php?user_id=${widget.userId}'),
+            'http://192.168.192.103/api/crud.php?user_id=${widget.userId}'),
       );
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -446,6 +481,7 @@ class _TambahDataKaryawanState extends State<TambahDataKaryawan> {
           _jumlahBersihController.text = karyawan['jumlah_bersih'];
           _divisiController.text = karyawan['divisi'];
           _userIdController.text = karyawan['user_id'];
+          _phoneController.text = karyawan['phone']; // Set phone field
         }
       }
     } catch (e) {
@@ -454,7 +490,8 @@ class _TambahDataKaryawanState extends State<TambahDataKaryawan> {
   }
 
   Future<void> _tambahData() async {
-    String apiUrl = 'http://192.168.116.105/api/tambah.php';
+    String apiUrl = 'http://192.168.192.103/api/tambah.php';
+    String phone = _phoneController.text; // Retrieve phone field
     Map<String, dynamic> data = {
       'bulan_tahun': _bulanTahunController.text,
       'nama': _namaController.text,
@@ -475,6 +512,7 @@ class _TambahDataKaryawanState extends State<TambahDataKaryawan> {
       'jumlah_bersih': _jumlahBersihController.text,
       'divisi': _divisiController.text,
       'user_id': _userIdController.text,
+      'phone': phone, // Include phone in data map
     };
 
     try {
@@ -488,10 +526,22 @@ class _TambahDataKaryawanState extends State<TambahDataKaryawan> {
             builder: (BuildContext context) {
               return AlertDialog(
                 title: Text('Sukses'),
-                content: Text(responseData['message']),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Pengguna yang aktif: ${widget.userId}'),
+                    Text(responseData['message']),
+                  ],
+                ),
                 actions: <Widget>[
                   TextButton(
-                    onPressed: () {
+                    onPressed: () async {
+                      // Mendapatkan alamat email dari API menggunakan userId
+                      String userId = widget.userId;
+                      await kirimNotifikasiTelegram(userId);
+
+                      // Setelah mengirim email, Anda dapat menutup dialog atau halaman
                       Navigator.of(context).pop();
                     },
                     child: Text('OK'),
@@ -525,6 +575,54 @@ class _TambahDataKaryawanState extends State<TambahDataKaryawan> {
     } catch (error) {
       print('Error: $error');
     }
+  }
+}
+
+Future<void> kirimNotifikasiTelegram(String activeUserId) async {
+  // Token bot Telegram Anda
+  String botToken = '6543843405:AAFECAn533jig-VEX8TIeiTfFf-iRk1TN3Q';
+  // URL untuk mengirim pesan melalui Bot API Telegram
+  String apiUrl = 'https://api.telegram.org/bot$botToken/sendMessage';
+
+  try {
+    // Panggil API untuk mendapatkan nomor telepon dari userId yang aktif
+    var response = await http.get(Uri.parse(
+        'http://192.168.192.103/api/notif.php?user_id=$activeUserId'));
+
+    if (response.statusCode == 200) {
+      // Parsing respons JSON
+      var userData = jsonDecode(response.body);
+
+      // Pastikan userData berisi informasi pengguna yang valid
+      if (userData is Map && userData.containsKey('phone')) {
+        String phoneNumber = userData['phone'];
+
+        // Kirim notifikasi ke nomor telepon yang diperoleh
+        var response = await http.post(
+          Uri.parse(apiUrl),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'chat_id': phoneNumber, // Kita gunakan nomor telepon sebagai chat_id
+            'text': 'Slip Gaji baru telah ditambahkan! silakan cek Aplikasi',
+          }),
+        );
+
+        if (response.statusCode == 200) {
+          print(
+              'Notifikasi berhasil dikirim ke nomor telepon: $phoneNumber');
+        } else {
+          print(
+              'Gagal mengirim notifikasi ke nomor telepon: $phoneNumber. Kode status: ${response.statusCode}');
+        }
+      } else {
+        print('Respons dari API: ${response.body}');
+      }
+    } else {
+      print(
+          'Gagal mendapatkan data pengguna dari API. Kode status: ${response.statusCode}');
+    }
+  } catch (error) {
+    print('Error: $error');
   }
 }
 

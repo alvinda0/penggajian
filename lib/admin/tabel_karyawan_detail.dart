@@ -1,81 +1,33 @@
-import 'package:animate_do/animate_do.dart';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:open_file/open_file.dart';
+import 'package:path_provider/path_provider.dart';
 
-void main() => runApp(SlipGajiDetail());
+class AnotherDetailPage extends StatelessWidget {
+  final Map<String, dynamic> detailData;
 
-class SlipGajiDetail extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Slip Gaji Detail',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: MyHomePage(),
-    );
-  }
-}
+  AnotherDetailPage({required this.detailData});
 
-class MyHomePage extends StatefulWidget {
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  List<dynamic> _data = [];
-
-  @override
-  void initState() {
-    super.initState();
-    fetchData();
-  }
-
-  Future<void> fetchData() async {
-    var url = Uri.parse('http://192.168.192.103/api/crud.php');
-
-    try {
-      var response = await http.get(url);
-
-      if (response.statusCode == 200) {
-        setState(() {
-          _data = json.decode(response.body);
-        });
-      } else {
-        print('Gagal mengambil data: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error: $e');
-    }
-  }
+  Future<void> saveAndLaunchPdf() async {
+    final pdfBytes = await generatePdf();
+    final output = await getTemporaryDirectory();
+    final file = File('${output.path}/Faktur_Gaji.pdf');
+    await OpenFile.open(file.path);
+  } 
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Slip Gaji Detail',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-        backgroundColor: const Color.fromARGB(255, 50, 97, 52),
+        title: Text('Faktur Gaji ${detailData['nama']}'),
       ),
-      body: _data.isEmpty
-          ? Center(
-              child: CircularProgressIndicator(),
-            )
-          : ListView.builder(
-              itemCount: _data.length,
-              itemBuilder: (context, index) {
-                return SingleChildScrollView(
-                  child: Container(
-                    padding: EdgeInsets.all(10),
-                    child: Column(
-                      children: <Widget>[
-                        SizedBox(height: 20),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(height: 20),
                         Center(
                           child: Image.asset(
                             'assets/images/icon.png', // ganti dengan path logo perusahaan
@@ -83,9 +35,17 @@ class _MyHomePageState extends State<MyHomePage> {
                             height: 100,
                           ),
                         ),
-                        SizedBox(height: 10),
+                                    SizedBox(height:10),
+
                         Text(
-                          'Bukit Mampang Residence Blok KI No.5-6 Jl.Cemara Kel.Grogol kec.Limo, Kota Depok',
+                          'Bukit Mampang Residence Blok KI No.5-6 Jl.Cemara',
+                          style: TextStyle(
+                              fontSize: 10, fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.center,
+                        ),
+                        SizedBox(height: 5),
+                        Text(
+                          ' Kel.Grogol kec.Limo, Kota Depok',
                           style: TextStyle(
                               fontSize: 10, fontWeight: FontWeight.bold),
                           textAlign: TextAlign.center,
@@ -98,7 +58,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         ),
                         SizedBox(height: 10),
                         Text(
-                          'Slip Gaji',
+                          'Faktur Gaji',
                           style: TextStyle(
                               fontSize: 20, fontWeight: FontWeight.bold),
                           textAlign: TextAlign.center,
@@ -113,8 +73,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 textAlign: TextAlign.center,
                               ),
                               Text(
-                                _data[index]['bulan_tahun'] ??
-                                    'Data Tidak Tersedia',
+                                ' ${detailData['bulan_tahun']}',
                                 style: TextStyle(fontSize: 16),
                                 textAlign: TextAlign.center,
                               ),
@@ -147,10 +106,10 @@ class _MyHomePageState extends State<MyHomePage> {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
-                                Text(_data[index]['nama']),
-                                Text(_data[index]['nip']),
-                                Text(_data[index]['divisi']),
-                                Text(_data[index]['status']),
+                                Text(' ${detailData['nama']}'),
+                                Text(' ${detailData['nip']}'),
+                                Text(' ${detailData['divisi']}'),
+                                Text(' ${detailData['status']}'),
                               ],
                             ),
                           ],
@@ -199,23 +158,23 @@ class _MyHomePageState extends State<MyHomePage> {
                                       fontWeight: FontWeight.bold),
                                 ),
                                 Text(
-                                  _data[index]['gaji_pokok'],
+                                  ' ${detailData['gaji_pokok']}',
                                   style: TextStyle(fontSize: 10),
                                 ),
                                 Text(
-                                  _data[index]['tunjangan_jabatan'],
+                                  ' ${detailData['tunjangan_jabatan']}',
                                   style: TextStyle(fontSize: 10),
                                 ),
                                 Text(
-                                  _data[index]['konsumsi'],
+                                  ' ${detailData['konsumsi']}',
                                   style: TextStyle(fontSize: 10),
                                 ),
                                 Text(
-                                  _data[index]['tunjangan_harian'],
+                                  ' ${detailData['tunjangan_harian']}',
                                   style: TextStyle(fontSize: 10),
                                 ),
                                 Text(
-                                  _data[index]['total_pendapatan'],
+                                  ' ${detailData['total_pendapatan']}',
                                   style: TextStyle(fontSize: 10),
                                 ),
                               ],
@@ -261,23 +220,23 @@ class _MyHomePageState extends State<MyHomePage> {
                                       fontWeight: FontWeight.bold),
                                 ),
                                 Text(
-                                  _data[index]['potongan_bpjs'],
+                                  ' ${detailData['potongan_bpjs']}',
                                   style: TextStyle(fontSize: 10),
                                 ),
                                 Text(
-                                  _data[index]['jht'],
+                                  ' ${detailData['jht']}',
                                   style: TextStyle(fontSize: 10),
                                 ),
                                 Text(
-                                  _data[index]['pensiun'],
+                                  ' ${detailData['pensiun']}',
                                   style: TextStyle(fontSize: 10),
                                 ),
                                 Text(
-                                  _data[index]['pph21'],
+                                  ' ${detailData['pph21']}',
                                   style: TextStyle(fontSize: 10),
                                 ),
                                 Text(
-                                  _data[index]['total_potongan'],
+                                  ' ${detailData['total_potongan']}',
                                   style: TextStyle(fontSize: 10),
                                 ),
                               ],
@@ -289,15 +248,9 @@ class _MyHomePageState extends State<MyHomePage> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
+                              
                               Text(
-                                'Jumlah Bersih ',
-                                style: TextStyle(
-                                    fontSize: 16, fontWeight: FontWeight.bold),
-                                textAlign: TextAlign.center,
-                              ),
-                              Text(
-                                _data[index]['jumlah_bersih'] ??
-                                    'Data Tidak Tersedia',
+                                'Penerima bersih: ${detailData['jumlah_bersih']}',
                                 style: TextStyle(fontSize: 16),
                                 textAlign: TextAlign.center,
                               ),
@@ -322,30 +275,30 @@ class _MyHomePageState extends State<MyHomePage> {
                           textAlign: TextAlign.center,
                         ),
                         SizedBox(height: 20),
-                        FadeInUp(
-                            duration: Duration(milliseconds: 1600),
-                            child: MaterialButton(
-                              onPressed: () {},
-                              height: 50,
-                              color: Colors.green[900],
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(50),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  "Login",
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                            )),
-                      ],
-                    ),
+                        Card(
+              color: Colors.green, // Warna latar belakang hijau
+
+              child: InkWell(
+                onTap: () async {
+                  await saveAndLaunchPdf();
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    'Download PDF',
+                    style: TextStyle(color: Colors.white), // Warna teks putih
                   ),
-                );
-              },
+                ),
+              ),
             ),
+           
+
+            // Tambahkan informasi lainnya sesuai kebutuhan
+          ],
+        ),
+      ),
     );
   }
+  
+  generatePdf() {}
 }

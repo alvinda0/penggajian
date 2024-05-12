@@ -25,7 +25,7 @@ class _RegisterState extends State<Register> {
 
   Future<void> _register(BuildContext context) async {
     final String url =
-        'http://192.168.43.105/api/register.php'; // Ganti dengan URL endpoint untuk register
+        'http://192.168.192.103/api/register.php'; // Ganti dengan URL endpoint untuk register
 
     final response = await http.post(
       Uri.parse(url),
@@ -80,7 +80,14 @@ class _RegisterState extends State<Register> {
       );
     }
   }
-
+void _goBack() {
+    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) {
+      return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: AppDrawerAdmin(nama: '', role: '', userId: '',),
+      );
+    }));
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -93,9 +100,7 @@ class _RegisterState extends State<Register> {
         ),
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
+          onPressed: _goBack,
         ),
       ),
       body: SingleChildScrollView(
@@ -126,7 +131,7 @@ class _RegisterState extends State<Register> {
                       height: 10,
                     ),
                     Text(
-                      "Welcome Back",
+                      "Welcome",
                       style: TextStyle(color: Colors.white, fontSize: 18),
                     ),
                   ],
@@ -282,7 +287,7 @@ class _RegisterState extends State<Register> {
       ),
       drawer: AppDrawerAdmin(
         nama: '',
-        role: '',
+        role: '', userId: '',
       ),
     );
   }

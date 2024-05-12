@@ -18,21 +18,33 @@ class DataDivisi extends StatefulWidget {
 
 class _DataDivisiState extends State<DataDivisi> {
   Map<String, Set<String>> _dataDivisi = {};
+  List<Map<String, dynamic>> _dataKaryawan = [];
   bool _isLoading = true;
 
   Future<void> _getData() async {
     try {
       final response =
-          await http.get(Uri.parse('http://192.168.116.105/api/crud.php'));
+          await http.get(Uri.parse('http://192.168.192.103/api/crud.php'));
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         for (var item in data) {
           String divisi = item['divisi'];
           String userId = item['user_id'];
+          String nama = item['nama']; // Tambahkan informasi nama
+          String status = item['status']; // Tambahkan informasi status
 
           // Tambahkan user_id ke set divisi yang sesuai
           _dataDivisi.putIfAbsent(divisi, () => {});
           _dataDivisi[divisi]!.add(userId);
+
+          // Tambahkan user_id, nama, dan status ke setiap objek karyawan
+          // sebelum menambahkannya ke dalam list data yang akan ditampilkan
+          _dataKaryawan.add({
+            'user_id': userId,
+            'nama': nama,
+            'status': status,
+            'divisi': divisi,
+          });
         }
         setState(() {
           _isLoading = false;
@@ -84,9 +96,14 @@ class _DataDivisiState extends State<DataDivisi> {
                             MaterialPageRoute(
                               builder: (context) => DataKaryawanDetail(
                                 dataKaryawan: dataKaryawan
-                                    .map((e) => {'user_id': e})
+                                    .map((userId) {
+                                      // Ambil data karyawan sesuai user_id
+                                      var karyawan = _dataKaryawan.firstWhere(
+                                          (karyawan) => karyawan['user_id'] == userId);
+                                      return karyawan;
+                                    })
                                     .toList(),
-                                userId: null,
+                                userId: '',
                                 role: '',
                                 karyawan: {},
                               ),
@@ -131,7 +148,7 @@ class _DataDivisiState extends State<DataDivisi> {
                 ),
       drawer: AppDrawerAdmin(
         nama: '',
-        role: '',
+        role: '', userId: '',
       ),
     );
   }

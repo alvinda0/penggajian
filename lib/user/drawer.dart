@@ -1,6 +1,6 @@
-// File: drawer.dart
-
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:penggajian/user/biodata.dart';
 import 'package:penggajian/login.dart';
 import 'package:penggajian/user/slip_gaji_page.dart';
@@ -11,21 +11,46 @@ class AppDrawer extends StatelessWidget {
 
   AppDrawer({required this.userId, required this.role});
 
+  Future<List<dynamic>> fetchUserInfo(String userId) async {
+    final response = await http.get(
+      Uri.parse('http://192.168.192.103/api/crud.php?user_id=$userId'),
+    );
+
+    if (response.statusCode == 200) {
+      List<dynamic> data = json.decode(response.body);
+      return data;
+    } else {
+      throw Exception('Failed to load user info');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
         children: <Widget>[
-          UserAccountsDrawerHeader(
-            accountName: Text("Nama Pengguna"),
-            accountEmail: Text("NIP"),
-            currentAccountPicture: CircleAvatar(
-              backgroundImage: AssetImage("assets/images/user_image.jpg"),
-            ),
-            decoration: BoxDecoration(
-              color: Color.fromARGB(255, 50, 97, 52),
-            ),
+          FutureBuilder<List<dynamic>>(
+            future: fetchUserInfo(userId),
+            builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return CircularProgressIndicator();
+              } else if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}');
+              } else {
+                var userInfo = snapshot.data![0]; // Ambil data pertama dari daftar
+                return UserAccountsDrawerHeader(
+                  accountName: Text(userInfo['nama']),
+                  accountEmail: Text(userInfo['nip']),
+                  currentAccountPicture: CircleAvatar(
+                    backgroundImage: AssetImage("assets/images/user.jfif"),
+                  ),
+                  decoration: BoxDecoration(
+                    color: Color.fromARGB(255, 50, 97, 52),
+                  ),
+                );
+              }
+            },
           ),
           ListTile(
             leading: Icon(Icons.dashboard),
@@ -52,8 +77,7 @@ class AppDrawer extends StatelessWidget {
                 MaterialPageRoute(
                   builder: (context) => SlipGajiPage(
                     userId: userId,
-                    role:
-                        role, // Memperbaiki inisialisasi SlipGajiPage dengan parameter role
+                    role: role,
                   ),
                 ),
               );

@@ -8,7 +8,7 @@ class AppDrawerAdmin extends StatelessWidget {
   final String nama;
   final String role;
 
-  AppDrawerAdmin({required this.nama, required this.role});
+  AppDrawerAdmin({required this.nama, required this.role, required String userId});
 
   @override
   Widget build(BuildContext context) {
@@ -33,11 +33,12 @@ class AppDrawerAdmin extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => DataDivisi(
-                          userId: null,
-                          role: '',
-                          dataKaryawan: [],
-                        )),
+                  builder: (context) => DataDivisi(
+                    userId: "userId_yang_valid", // Ganti dengan userId yang valid
+                    role: '', // Anda bisa mengisi role jika diperlukan
+                    dataKaryawan: [],
+                  ),
+                ),
               );
             },
           ),
@@ -45,7 +46,7 @@ class AppDrawerAdmin extends StatelessWidget {
             leading: Icon(
               Icons.description_outlined,
             ),
-            title: Text('Monthly Report'),
+            title: Text('Laporan Bulanan'),
             onTap: () {
               Navigator.push(
                 context,
@@ -89,7 +90,8 @@ class AppDrawerAdmin extends StatelessWidget {
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => LoginPage()),
+                              builder: (context) => LoginPage(),
+                            ),
                           );
                         },
                       ),

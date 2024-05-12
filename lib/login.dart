@@ -17,7 +17,7 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> login() async {
     String nip = nipController.text;
     String password = passwordController.text;
-    String apiUrl = 'http://192.168.116.105/api/login.php';
+    String apiUrl = 'http://192.168.192.103/api/login.php';
 
     try {
       var response = await http.post(
@@ -36,14 +36,15 @@ class _LoginPageState extends State<LoginPage> {
           if (role == 'user') {
             // Jika role adalah 'user', navigasi ke halaman SlipGajiPage
             Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => SlipGajiPage(
-                  userId: responseData['user_id'],
-                  role: role,
-                ),
-              ),
-            );
+  context,
+  MaterialPageRoute(
+    builder: (context) => SlipGajiPage(
+      userId: responseData['user_id'].toString(),
+      role: role,
+    ),
+  ),
+);
+
           } else if (role == 'admin') {
             // Jika role adalah 'admin', navigasi ke halaman DataKaryawan
             Navigator.pushReplacement(
@@ -155,7 +156,7 @@ class _LoginPageState extends State<LoginPage> {
                     FadeInUp(
                         duration: Duration(milliseconds: 1300),
                         child: Text(
-                          "Welcome Back",
+                          "Welcome",
                           style: TextStyle(color: Colors.white, fontSize: 18),
                         )),
                   ],
@@ -235,10 +236,10 @@ class _LoginPageState extends State<LoginPage> {
                             duration: Duration(milliseconds: 1500),
                             child: TextButton(
                               onPressed: () {
-                                // Navigasi ke halaman 1.dart ketika tombol ditekan
-                              },
+            
+          },
                               child: Text(
-                                "Forgot Password?",
+                                "Lupa Password?",
                                 style: TextStyle(
                                   color: const Color.fromARGB(255, 169, 22, 22),
                                 ),

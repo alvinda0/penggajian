@@ -1,30 +1,21 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:penggajian/admin/register.dart';
 
 void main() {
-  runApp(TambahDataKaryawanPage());
+  runApp(MaterialApp(
+    debugShowCheckedModeBanner: false,
+    home: TambahDataKaryawanPage(),
+  ));
 }
 
-class TambahDataKaryawanPage extends StatelessWidget {
+class TambahDataKaryawanPage extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Tambah Data Karyawan',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: TambahDataKaryawan(),
-    );
-  }
+  _RegisterState createState() => _RegisterState();
 }
 
-class TambahDataKaryawan extends StatefulWidget {
-  @override
-  _TambahDataKaryawanState createState() => _TambahDataKaryawanState();
-}
-
-class _TambahDataKaryawanState extends State<TambahDataKaryawan> {
+class _RegisterState extends State<TambahDataKaryawanPage> {
   TextEditingController _bulanTahunController = TextEditingController();
   TextEditingController _namaController = TextEditingController();
   TextEditingController _nipController = TextEditingController();
@@ -45,7 +36,7 @@ class _TambahDataKaryawanState extends State<TambahDataKaryawan> {
   TextEditingController _userIdController = TextEditingController();
 
   Future<void> _tambahData() async {
-    String apiUrl = 'http://192.168.43.105/api/tambah.php';
+    String apiUrl = 'http://192.168.192.103/api/tambah.php';
     Map<String, dynamic> data = {
       'bulan_tahun': _bulanTahunController.text,
       'nama': _namaController.text,
@@ -117,11 +108,24 @@ class _TambahDataKaryawanState extends State<TambahDataKaryawan> {
     }
   }
 
+  void _goBack() {
+    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) {
+      return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: Register(),
+      );
+    }));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Tambah Data Karyawan'),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: _goBack,
+        ),
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),

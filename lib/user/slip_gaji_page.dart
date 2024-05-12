@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:penggajian/user/biodata.dart';
 import 'package:penggajian/user/drawer.dart';
 
 class SlipGajiPage extends StatefulWidget {
@@ -11,37 +10,62 @@ class SlipGajiPage extends StatefulWidget {
   SlipGajiPage({required this.userId, required String role});
 
   @override
-  _BiodataState createState() => _BiodataState();
+  _SlipGajiPageState createState() => _SlipGajiPageState();
 }
 
-class _BiodataState extends State<SlipGajiPage> {
-  List<dynamic> biodataList = [];
+class _SlipGajiPageState extends State<SlipGajiPage> {
+  List<dynamic> slipGajiList = [];
 
   @override
   void initState() {
     super.initState();
-    fetchBiodata();
+    fetchSlipGaji();
   }
 
-  Future<void> fetchBiodata() async {
-    final response = await http.get(Uri.parse(
-        'http://192.168.116.105/api/crud.php?user_id=${widget.userId}'));
+  Future<void> fetchSlipGaji() async {
+    final response = await http.get(
+        Uri.parse('http://192.168.192.103/api/api.php?user_id=${widget.userId}'));
 
     if (response.statusCode == 200) {
+      final jsonData = json.decode(response.body);
+      final filteredSlipGaji = jsonData.where((slipGaji) => slipGaji['user_id'] == widget.userId).toList();
+
       setState(() {
-        biodataList = json.decode(response.body);
+        slipGajiList = filteredSlipGaji;
       });
     } else {
-      throw Exception('Failed to load biodata');
+      throw Exception('Failed to load slip gaji');
     }
   }
 
-  void _navigateToDetail(dynamic biodata) {
-    // Navigasi ke halaman detail dengan membawa data biodata yang dipilih
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => DetailData(biodata: biodata)),
+  Future<void> updateData(dynamic slipGaji) async {
+    final Map<String, dynamic> requestBody = {
+      'id': slipGaji['id'],
+      'email': slipGaji['email'],
+      'phone': slipGaji['phone'],
+    };
+
+    final response = await http.put(
+      Uri.parse('http://192.168.192.103/api/api.php'),
+      body: json.encode(requestBody),
+      headers: {'Content-Type': 'application/json'},
     );
+
+    if (response.statusCode == 200) {
+      print('Data berhasil diperbarui');
+      fetchSlipGaji(); // Ambil ulang data setelah berhasil diperbarui
+      showSuccessSnackbar(context, 'Data berhasil diperbarui');
+    } else {
+      print('Gagal memperbarui data');
+    }
+  }
+
+  void showSuccessSnackbar(BuildContext context, String message) {
+    final snackBar = SnackBar(
+      content: Text(message),
+      backgroundColor: Colors.green,
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   @override
@@ -49,7 +73,7 @@ class _BiodataState extends State<SlipGajiPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Biodata - User ID: ${widget.userId}', // Tambahkan User ID di AppBar
+          'Biodata - User ID: ${widget.userId}',
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.white,
@@ -59,54 +83,65 @@ class _BiodataState extends State<SlipGajiPage> {
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
-        child: biodataList.isEmpty
+        child: slipGajiList.isEmpty
             ? Center(child: CircularProgressIndicator())
             : ListView.builder(
-                itemCount: 1, // Menampilkan hanya satu item
+                itemCount: slipGajiList.length,
                 itemBuilder: (context, index) {
-                  final biodata = biodataList[index];
+                  final slipGaji = slipGajiList[index];
                   return InkWell(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Card(
-                          color: Colors.green,
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.person, // Menggunakan ikon person
-                                  size: 100.0,
-                                  color: Colors.white,
-                                ),
-                                SizedBox(width: 16.0),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Nama: ${biodata['nama']}',
-                                      style: TextStyle(
-                                          fontSize: 18.0, color: Colors.white),
-                                    ),
-                                    SizedBox(height: 8.0),
-                                    Text(
-                                      'NIP: ${biodata['nip']}',
-                                      style: TextStyle(
-                                          fontSize: 18.0, color: Colors.white),
-                                    ),
-                                    SizedBox(height: 8.0),
-                                    Text(
-                                      'Divisi: ${biodata['divisi']}',
-                                      style: TextStyle(
-                                          fontSize: 18.0, color: Colors.white),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
+                        TextField(
+                          readOnly: true,
+                          controller: TextEditingController(text: slipGaji['name']),
+                          style: TextStyle(fontSize: 18.0, color: Colors.black),
+                          decoration: InputDecoration(
+                            labelText: 'Nama',
+                            border: OutlineInputBorder(),
                           ),
                         ),
+                        SizedBox(height: 8.0),
+                        TextField(
+                          readOnly: true,
+                          controller: TextEditingController(text: slipGaji['nip']),
+                          style: TextStyle(fontSize: 18.0, color: Colors.black),
+                          decoration: InputDecoration(
+                            labelText: 'NIP',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                        SizedBox(height: 8.0),
+                        TextField(
+                          controller: TextEditingController(text: slipGaji['email']),
+                          onChanged: (newValue) {
+                            setState(() {
+                              slipGaji['email'] = newValue;
+                            });
+                          },
+                          style: TextStyle(fontSize: 18.0, color: Colors.black),
+                          decoration: InputDecoration(
+                            labelText: 'EMAIL',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                        SizedBox(height: 8.0),
+                        TextField(
+                          controller: TextEditingController(text: slipGaji['phone']),
+                          onChanged: (newValue) {
+                            setState(() {
+                              slipGaji['phone'] = newValue;
+                            });
+                          },
+                          style: TextStyle(fontSize: 18.0, color: Colors.black),
+                          decoration: InputDecoration(
+                            labelText: 'Phone',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                        SizedBox(height: 8.0),
+                       
                       ],
                     ),
                   );
@@ -114,8 +149,7 @@ class _BiodataState extends State<SlipGajiPage> {
               ),
       ),
       drawer: AppDrawer(
-        userId: widget.userId,
-        role: '',
+        userId: widget.userId, role: '',
       ),
     );
   }
